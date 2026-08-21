@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CardBid AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0f1115;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 34px;
+    }
+
+    .brand p {
+      margin-top: 8px;
+      color: #9ca3af;
+    }
+
+    .panel {
+      background: #191d24;
+      border: 1px solid #2b3039;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .upload {
+      border: 2px dashed #3a414d;
+      border-radius: 18px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .upload:hover {
+      border-color: #6b7280;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .scan-button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .card-preview {
+      width: 100%;
+      max-height: 340px;
+      object-fit: contain;
+      border-radius: 14px;
+      margin-top: 14px;
+      display: none;
+      background: black;
+    }
+
+    .result {
+      display: none;
+    }
+
+    .identified {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .identified h2 {
+      margin-bottom: 6px;
+    }
+
+    .identified p {
+      margin: 4px 0;
+      color: #c9ced6;
+    }
+
+    .traffic-light {
+      display: grid;
+      gap: 12px;
+    }
+
+    .light {
+      padding: 18px;
+      border-radius: 16px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 19px;
+      opacity: 0.35;
+    }
+
+    .green {
+      background: #14a44d;
+    }
+
+    .yellow {
+      background: #d8a300;
+    }
+
+    .red {
+      background: #d9363e;
+    }
+
+    .active {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+
+    .market {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid #343a45;
+      font-size: 15px;
+      color: #bfc5ce;
+      line-height: 1.5;
+    }
+
+    .confidence {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .demo-control {
+      margin-top: 18px;
+    }
+
+    .demo-control label {
+      display: block;
+      margin-bottom: 8px;
+      color: #c9ced6;
+    }
+
+    .demo-control input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #3d4450;
+      background: #101318;
+      color: white;
+      font-size: 18px;
+    }
+
+    .status {
+      text-align: center;
+      color: #9ca3af;
+      margin-top: 12px;
+      min-height: 20px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #6f7682;
+      font-size: 12px;
+      margin-top: 26px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <div class="brand">
+      <h1>CardBid AI 🚦</h1>
+      <p>Know when to bid.</p>
+    </div>
+
+    <div class="panel">
+      <label class="upload" for="cardImage">
+        <strong>📷 Scan Card</strong>
+        <div style="margin-top:8px;color:#9ca3af;">
+          Take a photo or upload a screenshot
+        </div>
+      </label>
+
+      <input
+        id="cardImage"
+        type="file"
+        accept="image/*"
+        capture="environment"
+      />
+
+      <img id="preview" class="card-preview" alt="Card preview" />
+
+      <button id="analyzeButton" class="scan-button">
+        Analyze Card
+      </button>
+
+      <div id="status" class="status"></div>
+    </div>
+
+    <div id="result" class="panel result">
+
+      <div class="identified">
+        <h2>Card Identified ✓</h2>
+        <p><strong>Drake Maye</strong></p>
+        <p>2024 Panini Prizm</p>
+        <p>#329 • Silver Prizm • Rookie</p>
+        <div class="confidence">Identification confidence: 96%</div>
+      </div>
+
+      <div class="traffic-light">
+        <div id="greenLight" class="light green">
+          🟢 GREEN — BUY<br />
+          ≤ $125
+        </div>
+
+        <div id="yellowLight" class="light yellow">
+          🟡 YELLOW — CAUTION<br />
+          $126–$175
+        </div>
+
+        <div id="redLight" class="light red">
+          🔴 RED — WALK<br />
+          $176+
+        </div>
+      </div>
+
+      <div class="demo-control">
+        <label for="currentBid">Current Auction Price</label>
+        <input
+          id="currentBid"
+          type="number"
+          value="100"
+          min="0"
+          step="1"
+        />
+      </div>
+
+      <div class="market">
+        Estimated raw market: <strong>$150–$185</strong><br />
+        CardBid hard max: <strong>$175</strong>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      CardBid AI Prototype v0.1
+    </div>
+
+  </div>
+
+  <script>
+    const cardImage = document.getElementById("cardImage");
+    const preview = document.getElementById("preview");
+    const analyzeButton = document.getElementById("analyzeButton");
+    const result = document.getElementById("result");
+    const status = document.getElementById("status");
+    const currentBid = document.getElementById("currentBid");
+
+    const greenLight = document.getElementById("greenLight");
+    const yellowLight = document.getElementById("yellowLight");
+    const redLight = document.getElementById("redLight");
+
+    cardImage.addEventListener("change", function () {
+      const file = cardImage.files[0];
+
+      if (!file) return;
+
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+
+      status.textContent = "Card image loaded.";
+    });
+
+    analyzeButton.addEventListener("click", function () {
+
+      if (!cardImage.files.length) {
+        status.textContent = "Upload or photograph a card first.";
+        return;
+      }
+
+      status.textContent = "Analyzing card...";
+
+      setTimeout(() => {
+        result.style.display = "block";
+        status.textContent = "Analysis complete.";
+        updateTrafficLight();
+      }, 900);
+    });
+
+    currentBid.addEventListener("input", updateTrafficLight);
+
+    function updateTrafficLight() {
+
+      const bid = Number(currentBid.value);
+
+      greenLight.classList.remove("active");
+      yellowLight.classList.remove("active");
+      redLight.classList.remove("active");
+
+      if (bid <= 125) {
+        greenLight.classList.add("active");
+      } else if (bid <= 175) {
+        yellowLight.classList.add("active");
+      } else {
+        redLight.classList.add("active");
+      }
+    }
+  </script>
+</body>
+</html>
