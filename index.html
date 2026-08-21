@@ -230,37 +230,27 @@
       </div>
 
       <div class="traffic-light">
-        <div id="greenLight" class="light green">
-          🟢 GREEN — BUY<br />
-          ≤ $125
-        </div>
+<div id="greenLight" class="light green">
+  🟢 STRONG BUY<br />
+  <span id="greenRange">≤ $140</span>
+</div>
 
-        <div id="yellowLight" class="light yellow">
-          🟡 YELLOW — CAUTION<br />
-          $126–$175
-        </div>
+<div id="yellowLight" class="light yellow">
+  🟡 FAIR BUY<br />
+  <span id="yellowRange">$141–$175</span>
+</div>
 
-        <div id="redLight" class="light red">
-          🔴 RED — WALK<br />
-          $176+
-        </div>
+<div id="redLight" class="light red">
+  🔴 OVER MARKET<br />
+  <span id="redRange">$176+</span>
+</div>
       </div>
 
-      <div class="demo-control">
-        <label for="currentBid">Current Auction Price</label>
-        <input
-          id="currentBid"
-          type="number"
-          value="100"
-          min="0"
-          step="1"
-        />
-      </div>
-
-      <div class="market">
-        Estimated raw market: <strong>$150–$185</strong><br />
-        CardBid hard max: <strong>$175</strong>
-      </div>
+<div class="market">
+  Estimated Market Value:
+  <strong id="marketValueDisplay">$175</strong><br />
+  Based on recent comparable sales
+</div>
 
     </div>
 
@@ -276,8 +266,7 @@
     const analyzeButton = document.getElementById("analyzeButton");
     const result = document.getElementById("result");
     const status = document.getElementById("status");
-    const currentBid = document.getElementById("currentBid");
-
+    
     const greenLight = document.getElementById("greenLight");
     const yellowLight = document.getElementById("yellowLight");
     const redLight = document.getElementById("redLight");
@@ -309,23 +298,36 @@
       }, 900);
     });
 
-    currentBid.addEventListener("input", updateTrafficLight);
+    
+function updateTrafficLight() {
 
-    function updateTrafficLight() {
+  // Temporary market value for prototype
+  const marketValue = 175;
 
-      const bid = Number(currentBid.value);
+  // CardBid formula
+  const greenMax = Math.round(marketValue * 0.80);
+  const yellowMin = greenMax + 1;
+  const yellowMax = marketValue;
+  const redMin = marketValue + 1;
 
-      greenLight.classList.remove("active");
-      yellowLight.classList.remove("active");
-      redLight.classList.remove("active");
+  // Update displayed ranges
+  document.getElementById("greenRange").textContent =
+    `≤ $${greenMax}`;
 
-      if (bid <= 125) {
-        greenLight.classList.add("active");
-      } else if (bid <= 175) {
-        yellowLight.classList.add("active");
-      } else {
-        redLight.classList.add("active");
-      }
+  document.getElementById("yellowRange").textContent =
+    `$${yellowMin}–$${yellowMax}`;
+
+  document.getElementById("redRange").textContent =
+    `$${redMin}+`;
+
+  document.getElementById("marketValueDisplay").textContent =
+    `$${marketValue}`;
+
+  // Show all ranges equally
+  greenLight.classList.add("active");
+  yellowLight.classList.add("active");
+  redLight.classList.add("active");
+}
     }
   </script>
 </body>
