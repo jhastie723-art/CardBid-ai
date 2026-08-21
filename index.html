@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>CardBid AI</title>
 
   <style>
@@ -12,19 +13,17 @@
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+      padding: 28px 16px;
       background: #0f1115;
       color: white;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 30px 16px;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
     .app {
       width: 100%;
       max-width: 460px;
+      margin: 0 auto;
     }
 
     .brand {
@@ -38,7 +37,7 @@
     }
 
     .brand p {
-      margin-top: 8px;
+      margin: 8px 0 0;
       color: #9ca3af;
     }
 
@@ -51,6 +50,7 @@
     }
 
     .upload {
+      display: block;
       border: 2px dashed #3a414d;
       border-radius: 18px;
       padding: 24px;
@@ -58,12 +58,18 @@
       cursor: pointer;
     }
 
-    .upload:hover {
-      border-color: #6b7280;
-    }
-
     input[type="file"] {
       display: none;
+    }
+
+    .card-preview {
+      width: 100%;
+      max-height: 340px;
+      object-fit: contain;
+      border-radius: 14px;
+      margin-top: 14px;
+      display: none;
+      background: black;
     }
 
     .scan-button {
@@ -77,14 +83,11 @@
       cursor: pointer;
     }
 
-    .card-preview {
-      width: 100%;
-      max-height: 340px;
-      object-fit: contain;
-      border-radius: 14px;
-      margin-top: 14px;
-      display: none;
-      background: black;
+    .status {
+      text-align: center;
+      color: #9ca3af;
+      margin-top: 12px;
+      min-height: 20px;
     }
 
     .result {
@@ -97,12 +100,37 @@
     }
 
     .identified h2 {
-      margin-bottom: 6px;
+      margin: 0 0 8px;
     }
 
     .identified p {
       margin: 4px 0;
       color: #c9ced6;
+    }
+
+    .confidence {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .market-value {
+      text-align: center;
+      margin-bottom: 18px;
+      padding: 14px;
+      border-radius: 14px;
+      background: #101318;
+    }
+
+    .market-value .label {
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    .market-value .value {
+      margin-top: 4px;
+      font-size: 32px;
+      font-weight: bold;
     }
 
     .traffic-light {
@@ -111,12 +139,11 @@
     }
 
     .light {
-      padding: 18px;
+      padding: 20px;
       border-radius: 16px;
       text-align: center;
+      font-size: 20px;
       font-weight: bold;
-      font-size: 19px;
-      opacity: 0.35;
     }
 
     .green {
@@ -131,51 +158,20 @@
       background: #d9363e;
     }
 
-    .active {
-      opacity: 1;
-      transform: scale(1.02);
+    .range {
+      display: block;
+      margin-top: 6px;
+      font-size: 26px;
     }
 
-    .market {
+    .market-note {
       margin-top: 18px;
       padding-top: 16px;
       border-top: 1px solid #343a45;
-      font-size: 15px;
-      color: #bfc5ce;
-      line-height: 1.5;
-    }
-
-    .confidence {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #9ca3af;
-    }
-
-    .demo-control {
-      margin-top: 18px;
-    }
-
-    .demo-control label {
-      display: block;
-      margin-bottom: 8px;
-      color: #c9ced6;
-    }
-
-    .demo-control input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #3d4450;
-      background: #101318;
-      color: white;
-      font-size: 18px;
-    }
-
-    .status {
       text-align: center;
-      color: #9ca3af;
-      margin-top: 12px;
-      min-height: 20px;
+      color: #bfc5ce;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .footer {
@@ -188,6 +184,7 @@
 </head>
 
 <body>
+
   <div class="app">
 
     <div class="brand">
@@ -196,6 +193,7 @@
     </div>
 
     <div class="panel">
+
       <label class="upload" for="cardImage">
         <strong>📷 Scan Card</strong>
         <div style="margin-top:8px;color:#9ca3af;">
@@ -210,125 +208,244 @@
         capture="environment"
       />
 
-      <img id="preview" class="card-preview" alt="Card preview" />
+      <img
+        id="preview"
+        class="card-preview"
+        alt="Card preview"
+      />
 
-      <button id="analyzeButton" class="scan-button">
+      <button
+        id="analyzeButton"
+        class="scan-button"
+      >
         Analyze Card
       </button>
 
       <div id="status" class="status"></div>
+
     </div>
 
     <div id="result" class="panel result">
 
       <div class="identified">
         <h2>Card Identified ✓</h2>
+
         <p><strong>Drake Maye</strong></p>
         <p>2024 Panini Prizm</p>
         <p>#329 • Silver Prizm • Rookie</p>
-        <div class="confidence">Identification confidence: 96%</div>
+
+        <div class="confidence">
+          Identification confidence: 96%
+        </div>
+      </div>
+
+      <div class="market-value">
+        <div class="label">
+          Estimated Market Value
+        </div>
+
+        <div
+          id="marketValueDisplay"
+          class="value"
+        >
+          $175
+        </div>
       </div>
 
       <div class="traffic-light">
-<div id="greenLight" class="light green">
-  🟢 STRONG BUY<br />
-  <span id="greenRange">≤ $140</span>
-</div>
 
-<div id="yellowLight" class="light yellow">
-  🟡 FAIR BUY<br />
-  <span id="yellowRange">$141–$175</span>
-</div>
+        <div class="light green">
+          🟢 STRONG BUY
+          <span
+            id="greenRange"
+            class="range"
+          >
+            ≤ $140
+          </span>
+        </div>
 
-<div id="redLight" class="light red">
-  🔴 OVER MARKET<br />
-  <span id="redRange">$176+</span>
-</div>
+        <div class="light yellow">
+          🟡 FAIR BUY
+          <span
+            id="yellowRange"
+            class="range"
+          >
+            $141–$175
+          </span>
+        </div>
+
+        <div class="light red">
+          🔴 OVER MARKET
+          <span
+            id="redRange"
+            class="range"
+          >
+            $176+
+          </span>
+        </div>
+
       </div>
 
-<div class="market">
-  Estimated Market Value:
-  <strong id="marketValueDisplay">$175</strong><br />
-  Based on recent comparable sales
-</div>
+      <div class="market-note">
+        Based on recent comparable sales
+      </div>
 
     </div>
 
     <div class="footer">
-      CardBid AI Prototype v0.1
+      CardBid AI Prototype v0.2
     </div>
 
   </div>
 
   <script>
-    const cardImage = document.getElementById("cardImage");
-    const preview = document.getElementById("preview");
-    const analyzeButton = document.getElementById("analyzeButton");
-    const result = document.getElementById("result");
-    const status = document.getElementById("status");
-    
-    const greenLight = document.getElementById("greenLight");
-    const yellowLight = document.getElementById("yellowLight");
-    const redLight = document.getElementById("redLight");
 
-    cardImage.addEventListener("change", function () {
-      const file = cardImage.files[0];
+    const cardImage =
+      document.getElementById("cardImage");
 
-      if (!file) return;
+    const preview =
+      document.getElementById("preview");
 
-      preview.src = URL.createObjectURL(file);
-      preview.style.display = "block";
+    const analyzeButton =
+      document.getElementById("analyzeButton");
 
-      status.textContent = "Card image loaded.";
-    });
+    const result =
+      document.getElementById("result");
 
-    analyzeButton.addEventListener("click", function () {
+    const status =
+      document.getElementById("status");
 
-      if (!cardImage.files.length) {
-        status.textContent = "Upload or photograph a card first.";
-        return;
+
+    /*
+      TEMPORARY PROTOTYPE VALUE
+
+      Later this number will come from
+      real sold-card data automatically.
+    */
+
+    const marketValue = 175;
+
+
+    cardImage.addEventListener(
+      "change",
+      function () {
+
+        const file =
+          cardImage.files[0];
+
+        if (!file) {
+          return;
+        }
+
+        preview.src =
+          URL.createObjectURL(file);
+
+        preview.style.display =
+          "block";
+
+        status.textContent =
+          "Card image loaded.";
+
       }
+    );
 
-      status.textContent = "Analyzing card...";
 
-      setTimeout(() => {
-        result.style.display = "block";
-        status.textContent = "Analysis complete.";
-        updateTrafficLight();
-      }, 900);
-    });
+    analyzeButton.addEventListener(
+      "click",
+      function () {
 
-    
-function updateTrafficLight() {
+        if (!cardImage.files.length) {
 
-  // Temporary market value for prototype
-  const marketValue = 175;
+          status.textContent =
+            "Upload or photograph a card first.";
 
-  // CardBid formula
-  const greenMax = Math.round(marketValue * 0.80);
-  const yellowMin = greenMax + 1;
-  const yellowMax = marketValue;
-  const redMin = marketValue + 1;
+          return;
 
-  // Update displayed ranges
-  document.getElementById("greenRange").textContent =
-    `≤ $${greenMax}`;
+        }
 
-  document.getElementById("yellowRange").textContent =
-    `$${yellowMin}–$${yellowMax}`;
+        status.textContent =
+          "Analyzing card...";
 
-  document.getElementById("redRange").textContent =
-    `$${redMin}+`;
+        setTimeout(
+          function () {
 
-  document.getElementById("marketValueDisplay").textContent =
-    `$${marketValue}`;
+            calculateRanges();
 
-  // Show all ranges equally
-  greenLight.classList.add("active");
-  yellowLight.classList.add("active");
-  redLight.classList.add("active");
-}
+            result.style.display =
+              "block";
+
+            status.textContent =
+              "Analysis complete.";
+
+          },
+          700
+        );
+
+      }
+    );
+
+
+    function calculateRanges() {
+
+      /*
+        CARDBID FORMULA
+
+        Green:
+        0% - 80% of market
+
+        Yellow:
+        81% - 100% of market
+
+        Red:
+        Over market value
+      */
+
+      const greenMax =
+        Math.round(
+          marketValue * 0.80
+        );
+
+      const yellowMin =
+        greenMax + 1;
+
+      const yellowMax =
+        marketValue;
+
+      const redMin =
+        marketValue + 1;
+
+
+      document.getElementById(
+        "greenRange"
+      ).textContent =
+        "≤ $" + greenMax;
+
+
+      document.getElementById(
+        "yellowRange"
+      ).textContent =
+        "$" +
+        yellowMin +
+        "–$" +
+        yellowMax;
+
+
+      document.getElementById(
+        "redRange"
+      ).textContent =
+        "$" +
+        redMin +
+        "+";
+
+
+      document.getElementById(
+        "marketValueDisplay"
+      ).textContent =
+        "$" + marketValue;
+
     }
+
   </script>
+
 </body>
 </html>
