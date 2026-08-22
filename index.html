@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>CardBid AI</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -90,13 +87,14 @@
       min-height: 20px;
     }
 
-    .result {
+    .result,
+    .verify-panel {
       display: none;
     }
 
     .identified {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .identified h2 {
@@ -108,10 +106,27 @@
       color: #c9ced6;
     }
 
-    .confidence {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #9ca3af;
+    .confidence-box {
+      text-align: center;
+      margin: 14px 0 18px;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+
+    .confidence-high {
+      background: #173d27;
+      color: #62e58b;
+    }
+
+    .confidence-medium {
+      background: #4a3b0a;
+      color: #ffd85a;
+    }
+
+    .confidence-low {
+      background: #43191c;
+      color: #ff777d;
     }
 
     .market-value {
@@ -146,17 +161,9 @@
       font-weight: bold;
     }
 
-    .green {
-      background: #14a44d;
-    }
-
-    .yellow {
-      background: #d8a300;
-    }
-
-    .red {
-      background: #d9363e;
-    }
+    .green { background: #14a44d; }
+    .yellow { background: #d8a300; }
+    .red { background: #d9363e; }
 
     .range {
       display: block;
@@ -174,6 +181,51 @@
       line-height: 1.5;
     }
 
+    .verify-title {
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .verify-title h2 {
+      margin: 0 0 8px;
+    }
+
+    .verify-title p {
+      margin: 0;
+      color: #aeb4bd;
+    }
+
+    .choice-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .choice-button {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #404753;
+      border-radius: 12px;
+      background: #11151b;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .choice-button:hover {
+      background: #20262f;
+    }
+
+    .verify-warning {
+      text-align: center;
+      padding: 18px;
+      border-radius: 14px;
+      background: #2a2021;
+      color: #ff9a9f;
+      font-weight: bold;
+    }
+
     .footer {
       text-align: center;
       color: #6f7682;
@@ -184,7 +236,6 @@
 </head>
 
 <body>
-
   <div class="app">
 
     <div class="brand">
@@ -193,7 +244,6 @@
     </div>
 
     <div class="panel">
-
       <label class="upload" for="cardImage">
         <strong>📷 Scan Card</strong>
         <div style="margin-top:8px;color:#9ca3af;">
@@ -208,243 +258,230 @@
         capture="environment"
       />
 
-      <img
-        id="preview"
-        class="card-preview"
-        alt="Card preview"
-      />
+      <img id="preview" class="card-preview" alt="Card preview" />
 
-      <button
-        id="analyzeButton"
-        class="scan-button"
-      >
+      <button id="analyzeButton" class="scan-button">
         Analyze Card
       </button>
 
       <div id="status" class="status"></div>
+    </div>
 
+    <div id="verifyPanel" class="panel verify-panel">
+      <div class="verify-title">
+        <h2>Verify Variation</h2>
+        <p>CardBid narrowed the card down, but needs one quick confirmation.</p>
+      </div>
+
+      <div id="verifyWarning" class="verify-warning">
+        Parallel confidence is not high enough for a safe valuation.
+      </div>
+
+      <div class="choice-grid">
+        <button class="choice-button" onclick="confirmVariation('Silver Prizm', 175)">
+          Silver Prizm
+        </button>
+
+        <button class="choice-button" onclick="confirmVariation('Base Prizm', 45)">
+          Base Prizm
+        </button>
+
+        <button class="choice-button" onclick="confirmVariation('Other / Unsure', null)">
+          Other / Unsure
+        </button>
+      </div>
     </div>
 
     <div id="result" class="panel result">
-
       <div class="identified">
         <h2>Card Identified ✓</h2>
 
-        <p><strong>Drake Maye</strong></p>
-        <p>2024 Panini Prizm</p>
-        <p>#329 • Silver Prizm • Rookie</p>
+        <p><strong id="playerName">Drake Maye</strong></p>
+        <p id="cardSet">2024 Panini Prizm</p>
+        <p id="cardDetails">#329 • Silver Prizm • Rookie</p>
+      </div>
 
-        <div class="confidence">
-          Identification confidence: 96%
-        </div>
+      <div id="confidenceBox" class="confidence-box confidence-high">
+        HIGH CONFIDENCE
       </div>
 
       <div class="market-value">
-        <div class="label">
-          Estimated Market Value
-        </div>
-
-        <div
-          id="marketValueDisplay"
-          class="value"
-        >
-          $175
-        </div>
+        <div class="label">Estimated Market Value</div>
+        <div id="marketValueDisplay" class="value">$175</div>
       </div>
 
       <div class="traffic-light">
-
         <div class="light green">
           🟢 STRONG BUY
-          <span
-            id="greenRange"
-            class="range"
-          >
-            ≤ $140
-          </span>
+          <span id="greenRange" class="range">≤ $140</span>
         </div>
 
         <div class="light yellow">
           🟡 FAIR BUY
-          <span
-            id="yellowRange"
-            class="range"
-          >
-            $141–$175
-          </span>
+          <span id="yellowRange" class="range">$141–$175</span>
         </div>
 
         <div class="light red">
           🔴 OVER MARKET
-          <span
-            id="redRange"
-            class="range"
-          >
-            $176+
-          </span>
+          <span id="redRange" class="range">$176+</span>
         </div>
-
       </div>
 
       <div class="market-note">
         Based on recent comparable sales
       </div>
-
     </div>
 
     <div class="footer">
-      CardBid AI Prototype v0.2
+      CardBid AI Prototype v0.3
     </div>
 
   </div>
 
   <script>
+    const cardImage = document.getElementById("cardImage");
+    const preview = document.getElementById("preview");
+    const analyzeButton = document.getElementById("analyzeButton");
+    const result = document.getElementById("result");
+    const verifyPanel = document.getElementById("verifyPanel");
+    const status = document.getElementById("status");
 
-    const cardImage =
-      document.getElementById("cardImage");
+    cardImage.addEventListener("change", function () {
+      const file = cardImage.files[0];
 
-    const preview =
-      document.getElementById("preview");
+      if (!file) return;
 
-    const analyzeButton =
-      document.getElementById("analyzeButton");
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
 
-    const result =
-      document.getElementById("result");
+      result.style.display = "none";
+      verifyPanel.style.display = "none";
 
-    const status =
-      document.getElementById("status");
+      status.textContent = "Card image loaded.";
+    });
 
+    analyzeButton.addEventListener("click", function () {
+      if (!cardImage.files.length) {
+        status.textContent = "Upload or photograph a card first.";
+        return;
+      }
 
-    /*
-      TEMPORARY PROTOTYPE VALUE
+      status.textContent = "Analyzing card...";
 
-      Later this number will come from
-      real sold-card data automatically.
-    */
+      result.style.display = "none";
+      verifyPanel.style.display = "none";
 
-    const marketValue = 175;
+      setTimeout(function () {
 
+        /*
+          TEMPORARY PROTOTYPE MODE
 
-    cardImage.addEventListener(
-      "change",
-      function () {
+          Change this value to test:
+          "high"
+          "medium"
+          "low"
 
-        const file =
-          cardImage.files[0];
+          Later this will come from the recognition engines.
+        */
 
-        if (!file) {
-          return;
+        const confidenceMode = "medium";
+
+        if (confidenceMode === "high") {
+          showResult(
+            "Drake Maye",
+            "2024 Panini Prizm",
+            "#329 • Silver Prizm • Rookie",
+            "HIGH",
+            175
+          );
         }
 
-        preview.src =
-          URL.createObjectURL(file);
-
-        preview.style.display =
-          "block";
-
-        status.textContent =
-          "Card image loaded.";
-
-      }
-    );
-
-
-    analyzeButton.addEventListener(
-      "click",
-      function () {
-
-        if (!cardImage.files.length) {
-
-          status.textContent =
-            "Upload or photograph a card first.";
-
-          return;
-
+        else if (confidenceMode === "medium") {
+          status.textContent = "Card identified. Variation needs confirmation.";
+          verifyPanel.style.display = "block";
         }
 
-        status.textContent =
-          "Analyzing card...";
+        else {
+          showLowConfidence();
+        }
 
-        setTimeout(
-          function () {
+      }, 700);
+    });
 
-            calculateRanges();
+    function confirmVariation(variation, marketValue) {
 
-            result.style.display =
-              "block";
+      verifyPanel.style.display = "none";
 
-            status.textContent =
-              "Analysis complete.";
-
-          },
-          700
-        );
-
+      if (marketValue === null) {
+        showLowConfidence();
+        return;
       }
-    );
 
-
-    function calculateRanges() {
-
-      /*
-        CARDBID FORMULA
-
-        Green:
-        0% - 80% of market
-
-        Yellow:
-        81% - 100% of market
-
-        Red:
-        Over market value
-      */
-
-      const greenMax =
-        Math.round(
-          marketValue * 0.80
-        );
-
-      const yellowMin =
-        greenMax + 1;
-
-      const yellowMax =
-        marketValue;
-
-      const redMin =
-        marketValue + 1;
-
-
-      document.getElementById(
-        "greenRange"
-      ).textContent =
-        "≤ $" + greenMax;
-
-
-      document.getElementById(
-        "yellowRange"
-      ).textContent =
-        "$" +
-        yellowMin +
-        "–$" +
-        yellowMax;
-
-
-      document.getElementById(
-        "redRange"
-      ).textContent =
-        "$" +
-        redMin +
-        "+";
-
-
-      document.getElementById(
-        "marketValueDisplay"
-      ).textContent =
-        "$" + marketValue;
-
+      showResult(
+        "Drake Maye",
+        "2024 Panini Prizm",
+        "#329 • " + variation + " • Rookie",
+        "MEDIUM",
+        marketValue
+      );
     }
 
+    function showResult(player, setName, details, confidence, marketValue) {
+
+      document.getElementById("playerName").textContent = player;
+      document.getElementById("cardSet").textContent = setName;
+      document.getElementById("cardDetails").textContent = details;
+
+      const confidenceBox = document.getElementById("confidenceBox");
+
+      confidenceBox.className = "confidence-box";
+
+      if (confidence === "HIGH") {
+        confidenceBox.classList.add("confidence-high");
+        confidenceBox.textContent = "HIGH CONFIDENCE";
+      }
+
+      else {
+        confidenceBox.classList.add("confidence-medium");
+        confidenceBox.textContent = "MEDIUM CONFIDENCE • USER VERIFIED";
+      }
+
+      calculateRanges(marketValue);
+
+      result.style.display = "block";
+      status.textContent = "Analysis complete.";
+    }
+
+    function showLowConfidence() {
+
+      verifyPanel.style.display = "none";
+      result.style.display = "none";
+
+      status.innerHTML =
+        "⚪ VERIFY CARD — identification signals conflict or confidence is too low.";
+
+      status.style.color = "#ff777d";
+    }
+
+    function calculateRanges(marketValue) {
+
+      const greenMax = Math.round(marketValue * 0.80);
+      const yellowMin = greenMax + 1;
+      const yellowMax = marketValue;
+      const redMin = marketValue + 1;
+
+      document.getElementById("greenRange").textContent =
+        "≤ $" + greenMax;
+
+      document.getElementById("yellowRange").textContent =
+        "$" + yellowMin + "–$" + yellowMax;
+
+      document.getElementById("redRange").textContent =
+        "$" + redMin + "+";
+
+      document.getElementById("marketValueDisplay").textContent =
+        "$" + marketValue;
+    }
   </script>
 
 </body>
